@@ -1,0 +1,8 @@
+eclipse.preferences.version=1
+encoding//StdPeriphDriver/CH58x_uart1.c=GBK
+encoding//StdPeriphDriver/inc/CH583SFR.h=GBK
+encoding//StdPeriphDriver/inc/CH58x_uart.h=GBK
+encoding//src/cjson/cJSON.c=GBK
+encoding//src/cjson/cJSON.h=GBK
+encoding//src/uart/uart.c=GBK
+encoding//src/uart/uart.h=GBK
