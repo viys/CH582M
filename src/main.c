@@ -24,7 +24,7 @@ int main()
     u1_printf("hello");
     while(1){
         u1_resive_detection();
-//        UART1_SendString(buff,9);
+
 //        mDelaymS(1000);
 
     }

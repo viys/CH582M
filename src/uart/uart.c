@@ -44,10 +44,10 @@ __INTERRUPT
 __HIGH_CODE
 void UART1_IRQHandler(void)
 {
-    if (UART_II_RECV_RDY == UART1_GetITFlag()) {
+    if(UART_II_RECV_RDY == UART1_GetITFlag()){
         UART1_RecvString(U1CB.URxDataIN->start);
         /* 将本次接收量累加到 URxCounrer */
-        U1CB.URxCounter += strlen((const char*)U1CB.URxDataIN->start);
+        U1CB.URxCounter += strlen(U1CB.URxDataIN->start);
         /* IN指针指向的结构体中的e指针记录本次接收结束位置 */
         U1CB.URxDataIN->end = &U1_RxBuff[U1CB.URxCounter - 1];
         /* IN指针后移 */
