@@ -1,4 +1,6 @@
 eclipse.preferences.version=1
+encoding//Startup/startup_CH583.S=GBK
+encoding//StdPeriphDriver/CH58x_timer3.c=GBK
 encoding//StdPeriphDriver/CH58x_uart1.c=GBK
 encoding//StdPeriphDriver/inc/CH583SFR.h=GBK
 encoding//StdPeriphDriver/inc/CH58x_uart.h=GBK

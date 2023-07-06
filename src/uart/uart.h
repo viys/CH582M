@@ -16,6 +16,9 @@
 #define FlagSET(Flag,bit)   (Flag |= bit)   //Flag置位
 #define FlagCLR(Flag,bit)   (Flag &= ~bit)  //Flag清位
 #define FlagGET(Flag,bit)   (Flag & bit)    //Flag获取
+#define ReggSET(reg,bit)   (((uint32_t*)reg) |= bit)   //Flag置位
+#define ReggCLR(reg,bit)   (((uint32_t*)reg) &= ~bit)  //Flag清位
+#define RegGET(reg,bit)   (((uint32_t*)reg) & bit)    //Flag获取
 
 #define U1_RX_SIZE  2048
 #define U1_TX_SIZE  2048
@@ -44,6 +47,15 @@ typedef struct{
     /* IN 和 OUT 指针的结尾标志 */
     UCB_URxBuffPtr *URxDataEND;
 }UCB_CB;
+
+/* 中断类型判断结构体 */
+/* 防止因一包数据为7的整数倍而丢失 */
+
+typedef struct{
+    /* 进入过UART_II_RECV_TOUT中断标志位 */
+    uint8_t enter_TOUT;
+    uint8_t enter_RSV;
+}UCB_SB;
 
 extern UCB_CB U1CB;
 extern uint8_t U1_RxBuff[U1_RX_SIZE];

@@ -8,7 +8,8 @@
 
 uint8_t U1_RxBuff[U1_RX_SIZE];
 uint8_t U1_TxBuff[U1_TX_SIZE];
-UCB_CB  U1CB;
+UCB_CB U1CB;
+UCB_SB U1SB;
 
 static void u0rx_ptr_init(void)
 {
@@ -22,6 +23,9 @@ static void u0rx_ptr_init(void)
     U1CB.URxDataIN->start = U1_RxBuff;
     /* 积累接收数量清零 */
     U1CB.URxCounter = 0;
+    /* 中断状态位清零 */
+    U1SB.enter_RSV = 0;
+    U1SB.enter_TOUT = 0;
 }
 
 void uart_init(void)
@@ -33,24 +37,52 @@ void uart_init(void)
     UART1_DefInit();
 
     /* 串口中断配置 */
-    UART1_ByteTrigCfg(UART_1BYTE_TRIG);
-    UART1_INTCfg(ENABLE, RB_IER_RECV_RDY);
+    UART1_ByteTrigCfg(UART_7BYTE_TRIG);
+    UART1_INTCfg(ENABLE, RB_IER_RECV_RDY | RB_IER_LINE_STAT);
     PFIC_EnableIRQ(UART1_IRQn);
 
     u0rx_ptr_init();
 }
 
+
 __INTERRUPT
 __HIGH_CODE
 void UART1_IRQHandler(void)
 {
-    if(UART_II_RECV_RDY == UART1_GetITFlag()){
-        UART1_RecvString(U1CB.URxDataIN->start);
-        /* 将本次接收量累加到 URxCounrer */
-        U1CB.URxCounter += strlen(U1CB.URxDataIN->start);
-        /* IN指针指向的结构体中的e指针记录本次接收结束位置 */
+    volatile uint8_t i;
+    uint32_t* reg;
+
+    switch(UART1_GetITFlag())
+    {
+        case UART_II_LINE_STAT: // 线路状态错误
+            break;
+
+        case UART_II_RECV_RDY: // 数据达到设置触发点
+                UART1_RecvString(U1CB.URxDataIN->start);
+                U1CB.URxCounter += 7;
+            break;
+
+        case UART_II_RECV_TOUT: // 接收超时，暂时一帧数据接收完成
+            i = UART1_RecvString(U1CB.URxDataIN->start);
+            U1CB.URxCounter += i;
+            U1SB.enter_TOUT = 1;
+            break;
+
+        case UART_II_THR_EMPTY: // 发送缓存区空，可继续发送
+            break;
+
+        case UART_II_MODEM_CHG: // 只支持串口0
+            break;
+
+        default:
+            U1SB.enter_RSV =1;
+            break;
+    }
+
+    if((R8_UART1_RBR==0&&R8_UART1_RFC==0)||U1SB.enter_TOUT){
+        U1SB.enter_TOUT = 0;
+
         U1CB.URxDataIN->end = &U1_RxBuff[U1CB.URxCounter - 1];
-        /* IN指针后移 */
         U1CB.URxDataIN++;
 
         /* 后移至END标记的位置 */
@@ -68,12 +100,13 @@ void UART1_IRQHandler(void)
             U1CB.URxCounter = 0;
         }
     }
-
 }
 
 void u1_event_handle(uint8_t *data,uint16_t datalen)
 {
-    UART1_SendString(data,datalen);
+    u1_printf("datalen:%d\r\n",datalen);
+//    UART1_SendString(data,datalen);
+
 }
 
 void u1_resive_detection(void)
