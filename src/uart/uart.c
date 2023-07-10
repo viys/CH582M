@@ -60,6 +60,7 @@ void UART1_IRQHandler(void)
         case UART_II_RECV_RDY: // 数据达到设置触发点
                 UART1_RecvString(U1CB.URxDataIN->start);
                 U1CB.URxCounter += 7;
+                //bug
             break;
 
         case UART_II_RECV_TOUT: // 接收超时，暂时一帧数据接收完成
